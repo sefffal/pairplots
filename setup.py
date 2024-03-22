@@ -26,7 +26,7 @@ else:
     # Write the version to version.py
     with open(os.path.join(os.path.dirname(__file__), "pairplots", "version.py"), "w") as f:
         f.write(f'__version__ = "{version}"\n')
-        f.write(f'__octofitter_jl_version__ = "{backend_version}"\n')
+        f.write(f'__pairplots_jl_version__ = "{backend_version}"\n')
 
     kwargs = {
         "use_scm_version": False,
@@ -44,4 +44,4 @@ if os.path.exists(".git"):
         # Find the version
         backend_version = re.search(r'"version":\s+"\W*(.*)"', data).group(1)
     with open(os.path.join(os.path.dirname(__file__), "pairplots", "version.py"), "a") as f:
-        f.write(f'__octofitter_jl_version__ = "{backend_version}"\n')
+        f.write(f'__pairplots_jl_version__ = "{backend_version}"\n')

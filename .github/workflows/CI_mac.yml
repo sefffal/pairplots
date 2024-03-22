@@ -1,0 +1,57 @@
+name: macOS
+
+on:
+  push:
+    branches:
+      - '**'
+    paths:
+      - 'test/**'
+      - 'pairplots/**'
+      - '.github/workflows/CI_mac.yml'
+      - 'setup.py'
+    tags:
+      - 'v*.*.*'
+  pull_request:
+    branches:
+      - '*'
+    paths:
+      - 'test/**'
+      - 'pairplots/**'
+      - '.github/workflows/CI_mac.yml'
+      - 'setup.py'
+
+jobs:
+  test:
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 60
+    defaults:
+      run:
+        shell: bash
+    strategy:
+      matrix:
+        julia-version: ['1']
+        python-version: ['3.11']
+        os: [macos-latest]
+
+    steps:
+      - uses: actions/checkout@v4
+      - name: "Set up Julia"
+        uses: julia-actions/setup-julia@v1
+        with:
+          version: ${{ matrix.julia-version }}
+      - name: "Cache Julia"
+        uses: julia-actions/cache@v1
+        with:
+          cache-name: ${{ matrix.os }}-test-${{ matrix.julia-version }}-${{ matrix.python-version }}
+          cache-packages: false
+      - name: "Set up Python"
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: pip
+      - name: "Install pairplots"
+        run: |
+            python -m pip install --upgrade pip
+            pip install pytest nbval
+            pip install .
+            python -c 'import pairplots'
