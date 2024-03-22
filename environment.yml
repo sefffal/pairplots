@@ -1,0 +1,6 @@
+name: test
+channels:
+  - conda-forge
+dependencies:
+  - python>=3.8
+  - pyjuliacall>=0.9.15,<0.10.0

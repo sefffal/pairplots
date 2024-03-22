@@ -1,0 +1,5 @@
+version.py
+build
+dist
+pairplots.egg-info
+**/__pycache__

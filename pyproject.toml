@@ -1,0 +1,31 @@
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "pairplots"
+version = "2.3.3"
+authors = [
+    {name = "William Thompson", email = "will.thompson@outlook.com"},
+]
+description = "Fast and flexible orbit fitting"
+readme = {file = "README.md", content-type = "text/markdown"}
+license = {file = "LICENSE"}
+requires-python = ">=3.8"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Operating System :: OS Independent",
+    "License :: OSI Approved :: Apache Software License"
+]
+dynamic = ["dependencies"]
+
+[tool.setuptools]
+packages = ["pairplots"]
+include-package-data = false
+package-data = {pairplots = ["juliapkg.json"]}
+
+[tool.setuptools.dynamic]
+dependencies = {file = "requirements.txt"}
+
+[tool.isort]
+profile = "black"

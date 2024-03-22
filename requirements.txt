@@ -1,0 +1,4 @@
+pandas>=0.21.0,<3.0.0
+numpy>=1.13.0,<2.0.0
+juliacall==0.9.19
+setuptools>=50.0.0
