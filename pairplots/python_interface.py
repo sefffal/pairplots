@@ -4,19 +4,12 @@ from pairplots import PairPlots
 from pairplots import jl
 from .julia_helpers import *
 import sys
-# import pandas as pd
 
-# Inside Planet and System blocks, which are resolved in the Main module,
 # we need various names available to the user
 jl.seval("using PairPlots, Makie")
 
-Makie = jl.Makie
 
-# We accept the following kinds of inputs:
-# * plain matrix, series as columns
-# * plain matrix, labels=["list", "of", "strings"]
-# * pandas Dataframe
-# * pandas Dataframe, labels={} dict mapping labels to rich types
+Makie = jl.Makie
 
 # Rich text formatting:
 rich = jl.Makie.rich
@@ -29,8 +22,26 @@ def latex(string):
 # Save figures
 save = jl.Makie.save
 
+# Forward all public series and visualiztion types
+_names = jl.seval("""[
+    prop
+    for prop in names(PairPlots, all=true, imported=false)
+    if getproperty(PairPlots,prop) isa Type && (
+        getproperty(PairPlots, prop) <: PairPlots.AbstractSeries ||
+        getproperty(PairPlots, prop) <: PairPlots.VizType
+)]""")
+for name in _names:
+    globals()[str(name)] = getattr(PairPlots, str(name))
+
+
+# Helper function to make a julia dict of symbols
 _dict_sym = jl.seval("(list) -> Dict{Symbol,Any}((Pair(l[1], l[2]) for l in list)...)")
 
+
+# We accept the following kinds of inputs:
+# * plain matrix, series as columns
+# * plain matrix, labels=["list", "of", "strings"]
+# * pandas Dataframe
 def _handle_args(
     *args,
     labels=[],
@@ -40,13 +51,14 @@ def _handle_args(
     legend={},
     **kwargs
     ):
-    # TODO: multiple tables, pandas
+    # Special support for corner.py style calling: matrix + labels=[str1, str2, etc]
     if len(args) == 1 and len(labels) > 0 and not isinstance(labels, collections.abc.Mapping):
         if len(labels) == np.shape(args[0])[1]:
             series = jl_named_tuple(labels, [col for col in args[0].T])
         else:
             raise ValueError(f"number of labels {len(labels)} does not match shape of array {np.shape(args[0])}")
 
+    # Otherwise follow PairPlots.jl conventions.
     series = [
         _handle_series(arg)
         for arg in args
@@ -87,8 +99,6 @@ def _handle_args(
 
     fig = PairPlots.pairplot(*series,**kwargs)
 
-    # TODO! can't figure out how to handle passing Series => viz pairs
-
     return fig
 
 series = PairPlots.Series
@@ -99,14 +109,8 @@ def _handle_series(data):
         else:
             raise ValueError("Pass series as a tuple of (data, viz_layers) where viz_layers is itself a tuple.")
     return data
-    # if isinstance(labels, collections.abc.Mapping):
-    # if isinstance(data, pd.DataFrame):
-        # return PairPlots.Series(data)
-    # elif jl.isa(data, PairPlots.series):
-        # return data
-    # else:
-    #     arr = np.array(data)
-    #     return PairPlots.Series(data)
+
+
 
 # These functions require us to load a plotting backend, which is a little
 # slow. Only load it when we need it.
