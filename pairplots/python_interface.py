@@ -54,15 +54,20 @@ def _handle_args(
     # Special support for corner.py style calling: matrix + labels=[str1, str2, etc]
     if len(args) == 1 and len(labels) > 0 and not isinstance(labels, collections.abc.Mapping):
         if len(labels) == np.shape(args[0])[1]:
-            series = jl_named_tuple(labels, [col for col in args[0].T])
+            series = [args[0]]
+            # labels = _dict_sym(jl_named_tuple(list(range(1,len(labels)+1)), labels))
+            labels = {
+                i+1: labels[i]
+                for i in range(len(labels))
+            }
         else:
             raise ValueError(f"number of labels {len(labels)} does not match shape of array {np.shape(args[0])}")
-
-    # Otherwise follow PairPlots.jl conventions.
-    series = [
-        _handle_series(arg)
-        for arg in args
-    ]
+    else:
+        # Otherwise follow PairPlots.jl conventions.
+        series = [
+            _handle_series(arg)
+            for arg in args
+        ]
     
     if isinstance(labels, collections.abc.Mapping):
         prepared = jl_array([
